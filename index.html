@@ -1,0 +1,209 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>pixi.js</title>
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			background-color: #191970;
+		}
+	</style>
+	<script src="pixi.js"></script>
+
+</head>
+<body>
+<audio id="demo" src="QuickSilver.wav" autoplay loop></audio>
+<div>
+  <button onclick="document.getElementById('demo').play()">Play the Audio</button>
+  <button onclick="document.getElementById('demo').pause()">Pause the Audio</button>
+  <button onclick="document.getElementById('demo').volume+=0.1">Increase Volume</button>
+  <button onclick="document.getElementById('demo').volume-=0.1">Decrease Volume</button>
+</div> <script>
+
+var interactive = true; // now pixi.js is interactive
+var count=0;
+    
+// create an new instance of a pixi stage , stage color must be set to white for the game to appear
+	var
+ stage = new PIXI.Stage(0xffffff, interactive);
+
+    
+    
+	// create a renderer instance
+	var renderer = PIXI.autoDetectRenderer(450, 1000);
+	
+	// add the renderer view element to the DOM
+	document.body.appendChild(renderer.view);
+     renderer.view.style.top = "0px";
+	renderer.view.style.left = "0px";
+	requestAnimFrame( animate );
+    
+ // create a background..
+	var background = PIXI.Sprite.fromImage("bkgnd.jpg");
+// add background to stage..
+     stage.addChild(background);
+        
+     
+	// create a texture from an image path
+     
+	var texture = PIXI.Texture.fromImage("rocket.gif");
+    
+  
+	// create a new Sprite using the texture , the rocket
+	var rocket = new PIXI.Sprite(texture);
+	
+    var Frame1,Frame2 = new Date().getTime(),NewFrame;
+    var Move = new Array();
+    
+    var Enemy = new Array ();
+	// center the rocket anchor point
+	rocket.anchor.x = 0.2;
+	rocket.anchor.y = 0.5;
+	
+	// move the rocket to the center of the screen
+	rocket.position.x = 200;
+	rocket.position.y = 150;
+	
+
+  // set the callbacks for when the mouse or a touch moves , makes the rocket moves with the movment of the mouse
+    rocket.mousemove = rocket.touchmove = function(data)
+{
+    this.data = data;
+    // need to get parent coords..
+    var newPosition = this.data.getLocalPosition(this.parent);
+    this.position.x = newPosition.x;
+    this.position.y = newPosition.y;
+}
+	
+  
+    stage.addChild(rocket);	
+    rocket.setInteractive(true);
+    
+
+// set the mousedown and touchstart callback
+    rocket.mousedown = function (data) {
+       fireballs(rocket.position.x,rocket.position.y);
+};
+
+    function update() {
+          Frame1 = new Date().getTime();
+// new frame (diff between 2 frames)
+          NewFrame = Frame1 - Frame2;
+
+        for (var i = 0; i < Move.length; i++) {
+        
+          Move[i].position.y -=Speed(NewFrame,2);
+//Acceleration from down to up (fireball)
+
+          }
+          for (var i=0;i<Enemy.length;i++)
+          {
+            Enemy[i].position.y +=Speed(NewFrame,4);
+// ACC from up to down (alien)
+          }
+          
+          Frame2= Frame1;
+}
+
+     var Speed = function (a, speed) {
+     return (speed * 60 * a) / 1000;
+// total distance travelled / total time taken 
+}
+
+
+     function Collision()
+         {
+         for (var i=0;i<Enemy.length;i++)
+         {
+         for (var k=0;k<Move.length;k++)
+         {
+         var b = Move[k];
+         var a = Enemy[i];
+         if ((b.position.x < (a.position.x + a.width)) && ((b.position.x + b.width) > a.position.x) && (b.position.y < (a.position.y + a.height)) && ((b.position.y + b.height) > a.position.y)	 ) 
+         {
+           Enemy.splice(i,1);
+           Move.splice(k,1);
+           stage.removeChild(b);
+           stage.removeChild(a);
+		   count++;
+         }
+         }
+         }
+         }
+
+                 
+    function fireballs(x,y){
+    
+       var texture = PIXI.Texture.fromImage("bullet.png");
+       
+       var fireball = new PIXI.Sprite(texture);
+       fireball.position.x = rocket.position.x;
+       fireball.position.y = rocket.position.y;
+       fireball.anchor.x = 0.5;
+       fireball.anchor.y = 0.5;
+       Move.push(fireball);
+       
+       stage.addChild(fireball);
+          update();
+
+}
+  function Alien(x,y){
+  if (count<3)
+  {
+    
+       var texture = PIXI.Texture.fromImage("bug.png");
+       
+       var Alien = new PIXI.Sprite(texture);
+       Alien.position.x = window.innerWidth * Math.random();
+       Alien.position.y = -window.innerHeight*Math.random();
+       Enemy.push(Alien);
+	   stage.addChild(Alien);
+          update();
+	   }
+	   else{
+	    var texture = PIXI.Texture.fromImage("bug.png");
+       
+       var Alien = new PIXI.Sprite(texture);
+       Alien.position.x = window.innerWidth * Math.random();
+       Alien.position.y = -window.innerHeight*Math.random();
+       Enemy.push(Alien);
+	   stage.addChild(Alien);
+	   var texture2 = PIXI.Texture.fromImage("bullet.png");
+	   var Alien2 = new PIXI.Sprite(texture2);
+       Alien2.position.x = window.innerWidth * Math.random();
+       Alien2.position.y = -window.innerHeight*Math.random();
+       Enemy.push(Alien2);
+	   stage.addChild(Alien2);
+          update();
+		  }
+	   
+       
+       
+
+}
+   
+     setInterval(Alien,1000); // This method repeatedly executes               the Alien to appear after 1000 milliseconds
+
+     setInterval(Collision,100);
+	
+
+
+    function animate() {
+	
+	    requestAnimFrame( animate );
+	    // render the stage   
+	    
+	    // do a test..
+	   	
+	    renderer.render(stage);
+        
+        update();
+	} 
+
+
+
+	</script>
+
+	</body>
+</html>
